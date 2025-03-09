@@ -40,7 +40,10 @@ public class TaskRepository
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Title TEXT NOT NULL,
                 IsCompleted INTEGER NOT NULL,
-                ProjectID INTEGER NOT NULL
+				DueDate INTEGER NOT NULL,
+				Description TEXT NOT NULL,
+				Priority INTEGER NOT NULL, 
+				ProjectID INTEGER NOT NULL
             );";
 			await createTableCmd.ExecuteNonQueryAsync();
 		}
@@ -71,12 +74,15 @@ public class TaskRepository
 		while (await reader.ReadAsync())
 		{
 			tasks.Add(new ProjectTask
-			{
-				ID = reader.GetInt32(0),
-				Title = reader.GetString(1),
-				IsCompleted = reader.GetBoolean(2),
-				ProjectID = reader.GetInt32(3)
-			});
+            {
+                ID = reader.GetInt32(0),
+                Title = reader.GetString(1),
+                IsCompleted = reader.GetBoolean(2),
+                DueDate = reader.GetDateTime(3),
+                Description = reader.GetString(4),
+                Priority = reader.GetFieldValue<Priority>(5),
+                ProjectID = reader.GetInt32(6)
+            });
 		}
 
 		return tasks;
@@ -102,12 +108,15 @@ public class TaskRepository
 		while (await reader.ReadAsync())
 		{
 			tasks.Add(new ProjectTask
-			{
-				ID = reader.GetInt32(0),
-				Title = reader.GetString(1),
-				IsCompleted = reader.GetBoolean(2),
-				ProjectID = reader.GetInt32(3)
-			});
+            {
+                ID = reader.GetInt32(0),
+                Title = reader.GetString(1),
+                IsCompleted = reader.GetBoolean(2),
+                DueDate = reader.GetDateTime(3),
+                Description = reader.GetString(4),
+                Priority = reader.GetFieldValue<Priority>(5),
+                ProjectID = reader.GetInt32(6)
+            });
 		}
 
 		return tasks;
@@ -136,7 +145,10 @@ public class TaskRepository
 				ID = reader.GetInt32(0),
 				Title = reader.GetString(1),
 				IsCompleted = reader.GetBoolean(2),
-				ProjectID = reader.GetInt32(3)
+                DueDate = reader.GetDateTime(3),
+                Description = reader.GetString(4),
+                Priority = reader.GetFieldValue<Priority>(5),
+                ProjectID = reader.GetInt32(6)
 			};
 		}
 
@@ -158,21 +170,29 @@ public class TaskRepository
 		if (item.ID == 0)
 		{
 			saveCmd.CommandText = @"
-            INSERT INTO Task (Title, IsCompleted, ProjectID) VALUES (@title, @isCompleted, @projectId);
+            INSERT INTO Task (Title, IsCompleted, ProjectID, DueDate, Description, Priority) VALUES
+			(@title, @isCompleted, @projectId, @dueDate, @description, @priority);
             SELECT last_insert_rowid();";
 		}
 		else
 		{
 			saveCmd.CommandText = @"
-            UPDATE Task SET Title = @title, IsCompleted = @isCompleted, ProjectID = @projectId WHERE ID = @id";
+            UPDATE Task SET Title = @title, IsCompleted = @isCompleted,
+							ProjectID = @projectId, DueDate = @dueDate,
+							Description = @description, Priority = @priority
+			WHERE ID = @id";
 			saveCmd.Parameters.AddWithValue("@id", item.ID);
 		}
 
 		saveCmd.Parameters.AddWithValue("@title", item.Title);
 		saveCmd.Parameters.AddWithValue("@isCompleted", item.IsCompleted);
 		saveCmd.Parameters.AddWithValue("@projectId", item.ProjectID);
+        saveCmd.Parameters.AddWithValue("@dueDate", item.DueDate);
+        saveCmd.Parameters.AddWithValue("@description", item.Description);
+        saveCmd.Parameters.AddWithValue("@priority", item.Priority);
 
-		var result = await saveCmd.ExecuteScalarAsync();
+
+        var result = await saveCmd.ExecuteScalarAsync();
 		if (item.ID == 0)
 		{
 			item.ID = Convert.ToInt32(result);

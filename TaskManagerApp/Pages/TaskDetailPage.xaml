@@ -15,7 +15,7 @@
             Order="Primary"
             Priority="0"
             IconImageSource="{StaticResource IconDelete}" />
-    </ContentPage.ToolbarItems>        
+    </ContentPage.ToolbarItems>
 
     <Grid>
         <ScrollView>
@@ -41,6 +41,19 @@
                         ItemDisplayBinding="{Binding Name, x:DataType=models:Project}"
                         SelectedItem="{Binding Project}"
                         SelectedIndex="{Binding SelectedProjectIndex}" />
+                </sf:SfTextInputLayout>
+
+                <sf:SfTextInputLayout
+                    Hint="Priority">
+                    <Picker 
+                        ItemsSource="{Binding Priorities}"
+                        SelectedItem="{Binding Priority, Mode=TwoWay}" />
+                </sf:SfTextInputLayout>
+                
+                <sf:SfTextInputLayout 
+                    Hint="Due Date">
+                    <Entry
+                        Text="{Binding DueDate}" />
                 </sf:SfTextInputLayout>
 
                 <Button 

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using TaskManagerApp.Models;
 using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace TaskManagerApp.Data;
 
@@ -24,16 +25,21 @@ public class SeedDataService
 
 	public async Task LoadSeedDataAsync()
 	{
-		ClearTables();
+		 ClearTables();
 
 		await using Stream templateStream = await FileSystem.OpenAppPackageFileAsync(_seedDataFilePath);
 
 		ProjectsJson? payload = null;
-		try
-		{
-			payload = JsonSerializer.Deserialize(templateStream, JsonContext.Default.ProjectsJson);
-		}
-		catch (Exception e)
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() }
+            };
+
+            payload = await JsonSerializer.DeserializeAsync<ProjectsJson>(templateStream, options);
+        }
+        catch (Exception e)
 		{
 			_logger.LogError(e, "Error deserializing seed data");
 		}

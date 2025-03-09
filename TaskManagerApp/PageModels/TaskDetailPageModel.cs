@@ -21,7 +21,18 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 	[ObservableProperty]
 	private bool _isCompleted;
 
-	[ObservableProperty]
+    [ObservableProperty]
+    private string _description = string.Empty;
+
+    public List<Priority> Priorities { get; } = [.. Enum.GetValues<Priority>()];
+
+    [ObservableProperty]
+    private Priority _priority;
+
+    [ObservableProperty]
+    private DateTime _dueDate;
+
+    [ObservableProperty]
 	private List<Project> _projects = [];
 
 	[ObservableProperty]
@@ -97,7 +108,10 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 
 			Title = _task.Title;
 			IsCompleted = _task.IsCompleted;
-			CanDelete = true;
+            Priority = _task.Priority;
+            Description = _task.Description;
+            DueDate = _task.DueDate;
+            CanDelete = true;
 		}
 		else
 		{
@@ -137,8 +151,11 @@ public partial class TaskDetailPageModel : ObservableObject, IQueryAttributable
 			_task.ProjectID = projectId = Projects[SelectedProjectIndex].ID;
 
 		_task.IsCompleted = IsCompleted;
+        _task.Priority = Priority;
+        _task.Description = Description;
+        _task.DueDate = DueDate;
 
-		if (Project?.ID == projectId && !Project.Tasks.Contains(_task))
+        if (Project?.ID == projectId && !Project.Tasks.Contains(_task))
 			Project.Tasks.Add(_task);
 
 		if (_task.ProjectID > 0)
